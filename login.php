@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Ellenőrizzük, hogy létezik-e a felhasználónév
-    $stmt = $conn->prepare("SELECT id, jelszo FROM felhasznalok WHERE felhasznalonev = ?");
+    $stmt = $conn->prepare("SELECT felhasznalo_id, jelszo FROM felhasznalo WHERE felhasznalonev = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();

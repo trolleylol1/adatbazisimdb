@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST['jelszo'];
 
     // Felhasználónév ellenőrzése
-    $stmt = $conn->prepare("SELECT id FROM felhasznalok WHERE felhasznalonev = ?");
+    $stmt = $conn->prepare("SELECT felhasznalo_id FROM felhasznalo WHERE felhasznalonev = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->close();
 
     // Új felhasználó hozzáadása
-    $stmt = $conn->prepare("INSERT INTO felhasznalok (felhasznalonev, jelszo) VALUES (?, ?)");
+    $stmt = $conn->prepare("INSERT INTO felhasznalo (felhasznalonev, jelszo) VALUES (?, ?)");
     $stmt->bind_param("ss", $username, $password);
 
     if ($stmt->execute()) {
