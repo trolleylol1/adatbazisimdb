@@ -7,7 +7,7 @@ if (!isset($_SESSION['username'])) {
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "IMDB";
+$dbname = "projektmunka_imdb";  // Az adatbázis neve
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -17,18 +17,38 @@ if ($conn->connect_error) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $type = $_POST['type']; // "movie" vagy "series"
 
+    // Lekérjük a felhasználó ID-ját
+    $felhasznalonev = $_SESSION['username'];
+    $sql_user_id = "SELECT felhasznalo_id FROM Felhasznalo WHERE felhasznalonev = ?";
+    $stmt_user = $conn->prepare($sql_user_id);
+    $stmt_user->bind_param("s", $felhasznalonev);
+    $stmt_user->execute();
+    $result_user = $stmt_user->get_result();
+    
+    if ($result_user->num_rows === 0) {
+        die("Érvénytelen felhasználónév!");
+    }
+
+    $user_data = $result_user->fetch_assoc();
+    $felhasznalo_id = $user_data['felhasznalo_id'];
+
     if ($type === 'movie') {
         // Film hozzáadása
         $title = $_POST['title'];
         $genre = $_POST['genre'];
         $duration = $_POST['duration'];
         $release_year = $_POST['release_year_movie'];
+        $rating = $_POST['rating'];  // Értékelés
 
-        $stmt = $conn->prepare("INSERT INTO filmek (cim, mufaj, jatekido, megjelenes_eve) VALUES (?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO Filmek (cim, mufaj, jatekido, megjelenes_eve) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssii", $title, $genre, $duration, $release_year);
 
         if ($stmt->execute()) {
-            echo "Film sikeresen hozzáadva!";
+            $film_id = $stmt->insert_id;
+            $stmt_ertekeles = $conn->prepare("INSERT INTO Ertekeles (felhasznalo_id, film_id, ertekeles) VALUES (?, ?, ?)");
+            $stmt_ertekeles->bind_param("iid", $felhasznalo_id, $film_id, $rating);
+            $stmt_ertekeles->execute();
+            echo "Film és értékelés sikeresen hozzáadva!";
         } else {
             echo "Hiba történt a film hozzáadásakor: " . $stmt->error;
         }
@@ -38,12 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $genre = $_POST['genre'];
         $seasons = $_POST['seasons'];
         $episodes = $_POST['episodes'];
+        $rating = $_POST['rating'];  // Értékelés
 
-        $stmt = $conn->prepare("INSERT INTO sorozatok (cim, mufaj, evadok, reszek) VALUES (?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO Sorozatok (cim, mufaj, evadok, reszek) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssii", $title, $genre, $seasons, $episodes);
 
         if ($stmt->execute()) {
-            echo "Sorozat sikeresen hozzáadva!";
+            $sorozat_id = $stmt->insert_id;
+            $stmt_ertekeles = $conn->prepare("INSERT INTO Ertekeles (felhasznalo_id, sorozat_id, ertekeles) VALUES (?, ?, ?)");
+            $stmt_ertekeles->bind_param("iid", $felhasznalo_id, $sorozat_id, $rating);
+            $stmt_ertekeles->execute();
+            echo "Sorozat és értékelés sikeresen hozzáadva!";
         } else {
             echo "Hiba történt a sorozat hozzáadásakor: " . $stmt->error;
         }
@@ -56,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>

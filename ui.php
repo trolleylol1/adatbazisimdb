@@ -9,20 +9,22 @@ session_start();  // Session indítása
          <title>IMDB Applikáció</title>
           <style> #register, #login { display: none; } </style>
           <link rel="stylesheet" href="styles.css">
-          <script src="imdbscript.js"></script>
+          
         </head>
          <body> 
           <div id="ui">
             <header>
-                 <h1>Üdvözöllek az ✨<span id="meno">IMDB</span>✨ adatbázisban!</h1>
+                 <h1>Üdvözöllek az ✨<span id="verycool">IMDB</span>✨ adatbázisban!</h1>
                  
                  <?php if (isset($_SESSION['username'])): ?>
     
     <p id="greeting">Szia, <?php echo $_SESSION['username']; ?>!</p>
     <button onclick="window.location.href='ui.php'">Főoldal</button>
     <button onclick="document.getElementById('add').style.display='block';">Film/Sorozat felvétele</button>
-    <button id="addButton" onclick="toggleForm()">Értékelés</button>
+    <button onclick="window.location.href='list.php'">Filmek és Sorozatok Listája</button>
+    <button onclick="window.location.href='rating.php'">Értékelés</button>
     <button onclick="window.location.href='logout.php'">Kijelentkezés</button>
+    
     
 <?php else: ?>
     
@@ -33,7 +35,9 @@ session_start();  // Session indítása
                  <main>
                      <section id="register"> 
                          <h2>Regisztráció</h2> 
-                         <form action="/adatbazisprojekt/register.php" method="POST"> 
+                         <form action="/adatbazisprojekt/register.php" method="POST">
+                            <label for="nev">Név:</label>
+                             <input type="text" id="nev" name="nev" required> 
                               <label for="felhasznalonev" id="loginsigninlabel">Felhasználónév:</label>
                                <input type="text" id="username" name="felhasznalonev" placeholder="Felhasználónév" required> 
                                 <label for="password" id="loginsigninlabel">Jelszó:</label>
@@ -54,40 +58,41 @@ session_start();  // Session indítása
                                         </section>
                      <section id="add" style="display: none;">
                                 <h2>Film/Sorozat hozzáadása</h2>
+                                
                                      <form action="add.php" method="POST" id="addForm">
                                             <!-- Típus kiválasztása -->
-                                            <label for="type">Típus:</label>
-                                                <select id="type" name="type" required>
-                                                   <option value="movie">Film</option>
-                                                <option value="series">Sorozat</option>
-                                                 </select>
+                                            <label for="type">Típus:</label><br>
+        <input type="radio" id="movie" name="type" value="movie" required onchange="toggleFields()">
+        <label for="movie">Film</label>
+        <input type="radio" id="series" name="type" value="series" required onchange="toggleFields()">
+        <label for="series">Sorozat</label><br><br>
 
-                                                    <!-- Közös mezők -->
-                                                    <div id="commonFields">
-                                                        <label for="title">Cím:</label>
-                                                        <input type="text" id="title" name="title" placeholder="Cím" required>
+        <label for="title">Cím:</label><br>
+        <input type="text" name="title" required><br><br>
 
-                                                        <label for="genre">Műfaj:</label>
-                                                        <input type="text" id="genre" name="genre" placeholder="Műfaj" required>
-                                                    </div>
+        <label for="genre">Műfaj:</label><br>
+        <input type="text" name="genre" required><br><br>
 
-                                                    <!-- Film-specifikus mezők -->
-                                                    <div id="movieFields" style="display: none;">
-                                                        <label for="duration">Játékidő (perc):</label>
-                                                        <input type="number" id="duration" name="duration" placeholder="Játékidő" min="1">
+        <!-- Film-specifikus mezők -->
+        <div id="movie_fields" style="display:none;">
+            <label for="duration">Játékidő (Film esetén):</label><br>
+            <input type="number" name="duration"><br><br>
 
-                                                        <label for="release_year_movie">Megjelenés éve:</label>
-                                                        <input type="number" id="release_year_movie" name="release_year_movie" placeholder="Megjelenés éve" min="1900">
-                                                    </div>
+            <label for="release_year_movie">Megjelenés Éve (Film esetén):</label><br>
+            <input type="number" name="release_year_movie"><br><br>
+        </div>
 
-                                                    <!-- Sorozat-specifikus mezők -->
-                                                    <div id="seriesFields" style="display: none;">
-                                                        <label for="seasons">Évadok:</label>
-                                                        <input type="number" id="seasons" name="seasons" placeholder="Évadok" min="1">
+        <!-- Sorozat-specifikus mezők -->
+        <div id="series_fields" style="display:none;">
+            <label for="seasons">Évadok (Sorozat esetén):</label><br>
+            <input type="number" name="seasons"><br><br>
 
-                                                        <label for="episodes">Részek száma:</label>
-                                                        <input type="number" id="episodes" name="episodes" placeholder="Részek száma" min="1">
-                                                    </div>
+            <label for="episodes">Részek (Sorozat esetén):</label><br>
+            <input type="number" name="episodes"><br><br>
+        </div>
+
+        <label for="rating">Értékelés:</label><br>
+        <input type="number" name="rating" min="0" max="10" step="0.1" required><br><br>
 
                                                     <!-- Beküldés -->
                                                     <button type="submit">Hozzáadás</button>
@@ -95,35 +100,27 @@ session_start();  // Session indítása
                                             </section>
 
                                             <script>
-                                                // Dinamikus mezőváltás
-                                                document.getElementById('type').addEventListener('change', function () {
-                                                    const type = this.value;
-                                                    document.getElementById('movieFields').style.display = type === 'movie' ? 'block' : 'none';
-                                                    document.getElementById('seriesFields').style.display = type === 'series' ? 'block' : 'none';
-                                                });
-                                            </script>
-                                            <script>
-                                                // A form megjelenítése/elrejtése
-                                                function toggleForm() {
-                                                    const formSection = document.getElementById('add');
-                                                    const isVisible = formSection.style.display === 'block';
-                                                    formSection.style.display = isVisible ? 'none' : 'block';
-                                                }
-                                                // Dinamikus mezőváltás
-                                                    document.getElementById('type').addEventListener('change', function () {
-                                                        const type = this.value;
-                                                        document.getElementById('movieFields').style.display = type === 'movie' ? 'block' : 'none';
-                                                        document.getElementById('seriesFields').style.display = type === 'series' ? 'block' : 'none';
-                                                    });
+        function toggleFields() {
+            var type = document.querySelector('input[name="type"]:checked').value;
+            if (type === 'movie') {
+                document.getElementById("movie_fields").style.display = "block";
+                document.getElementById("series_fields").style.display = "none";
+            } else if (type === 'series') {
+                document.getElementById("movie_fields").style.display = "none";
+                document.getElementById("series_fields").style.display = "block";
+            }
+        }
+    </script>
                                  </section>
                 <section id="rating">
-                                                                
+                                                          
                  </section>
-
+                 
+                 
             </main>
         </div>
-        <img src="protekcio.jfif" title="protekcio" alt="protekcio">
-                                   
+        <div><img src="protekcio.jpg" id="protekcio" alt="xd"></div>
+                         
         <footer>
               © 2024 use code kormosbiznisz in the itemshop
         </footer> 

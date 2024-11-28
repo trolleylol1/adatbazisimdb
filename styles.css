@@ -16,9 +16,9 @@ h2 {
     margin-left: 10px;
 }
 
-#meno {
+#verycool {
     background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
-    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -35,7 +35,7 @@ button {
 
 #ui {
     width: 703px;
-    height:500px;
+    
     background-color: #747474;
 }
 
@@ -53,4 +53,14 @@ footer {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 20px;
     margin-left: 5px;
+}
+#movie-fields, #series-fields {
+    display: none;
+}
+#protekcio{
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 100px; /* Igazítsd az igény szerint */
+    height: auto; /* Ezt is testre szabhatod */
 }
