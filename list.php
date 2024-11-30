@@ -1,3 +1,4 @@
+<!--filmsorozat listazas gomb  -->
 <?php
 session_start();
 include 'db_connection.php';
@@ -28,15 +29,22 @@ $felhasznalo_id = $user_data['felhasznalo_id'];
 
 $sql_filmek = "
     SELECT 
+        Filmek.film_id,
         Filmek.cim,
         Filmek.mufaj,
         Filmek.jatekido,
         Filmek.megjelenes_eve,
-        Ertekeles.ertekeles AS sajat_ertekeles
+        Ertekeles.ertekeles AS sajat_ertekeles,
+        GROUP_CONCAT(Szinesz.nev SEPARATOR ', ') AS szinesz
     FROM Filmek
     LEFT JOIN Ertekeles 
         ON Filmek.film_id = Ertekeles.film_id 
-        AND Ertekeles.felhasznalo_id = ?  -- Csak a bejelentkezett felhasználó értékelése
+        AND Ertekeles.felhasznalo_id = ?
+    LEFT JOIN Szerepel 
+        ON Filmek.film_id = Szerepel.film_id
+    LEFT JOIN Szinesz
+        ON Szerepel.szinesz_id = Szinesz.szinesz_id
+    GROUP BY Filmek.film_id
 ";
 $stmt_filmek = $conn->prepare($sql_filmek);
 $stmt_filmek->bind_param("i", $felhasznalo_id);
@@ -45,15 +53,22 @@ $result_filmek = $stmt_filmek->get_result();
 
 $sql_sorozatok = "
     SELECT 
+        Sorozatok.sorozat_id,
         Sorozatok.cim,
         Sorozatok.mufaj,
         Sorozatok.evadok,
         Sorozatok.reszek,
-        Ertekeles.ertekeles AS sajat_ertekeles
+        Ertekeles.ertekeles AS sajat_ertekeles,
+        GROUP_CONCAT(Szinesz.nev SEPARATOR ', ') AS szinesz
     FROM Sorozatok
     LEFT JOIN Ertekeles 
         ON Sorozatok.sorozat_id = Ertekeles.sorozat_id 
-        AND Ertekeles.felhasznalo_id = ?  -- Csak a bejelentkezett felhasználó értékelése
+        AND Ertekeles.felhasznalo_id = ?
+    LEFT JOIN Szerepel 
+        ON Sorozatok.sorozat_id = Szerepel.sorozat_id
+    LEFT JOIN Szinesz
+        ON Szerepel.szinesz_id = Szinesz.szinesz_id
+    GROUP BY Sorozatok.sorozat_id
 ";
 $stmt_sorozatok = $conn->prepare($sql_sorozatok);
 $stmt_sorozatok->bind_param("i", $felhasznalo_id);
@@ -90,53 +105,73 @@ $result_sorozatok = $stmt_sorozatok->get_result();
     
     <!-- Filmek táblázata -->
     <h2>Filmek</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Cím</th>
-            <th>Műfaj</th>
-            <th>Játékidő (perc)</th>
-            <th>Megjelenés Éve</th>
-            <th>Értékelés</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php while ($row = $result_filmek->fetch_assoc()): ?>
+    <table>
+        <thead>
             <tr>
-                <td><?= htmlspecialchars($row['cim']); ?></td>
-                <td><?= htmlspecialchars($row['mufaj']); ?></td>
-                <td><?= htmlspecialchars($row['jatekido'] ?? 'N/A'); ?></td>
-                <td><?= htmlspecialchars($row['megjelenes_eve'] ?? 'N/A'); ?></td>
-                <td><?= htmlspecialchars($row['sajat_ertekeles'] ?? 'Még nem értékelted'); ?></td>
+                <th>Cím</th>
+                <th>Műfaj</th>
+                <th>Játékidő (perc)</th>
+                <th>Megjelenés Éve</th>
+                <th>Színészek</th>
+                <th>Értékelés</th>
+                
             </tr>
-        <?php endwhile; ?>
-    </tbody>
-</table>
-    
+        </thead>
+        <tbody>
+            <?php while ($row = $result_filmek->fetch_assoc()): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['cim']); ?></td>
+                    <td><?= htmlspecialchars($row['mufaj']); ?></td>
+                    <td><?= htmlspecialchars($row['jatekido'] ?? 'N/A'); ?></td>
+                    <td><?= htmlspecialchars($row['megjelenes_eve'] ?? 'N/A'); ?></td>
+                    <td><?= htmlspecialchars($row['szinesz'] ?? 'N/A'); ?></td>
+                    <td>
+                        <?php if ($row['sajat_ertekeles'] === null): ?>
+                            Még nem értékelted
+                            <button onclick="window.location.href='rating.php?type=movie&id=<?= $row['film_id']; ?>'">Értékelés</button>
+                        <?php else: ?>
+                            <?= htmlspecialchars($row['sajat_ertekeles']); ?>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+
     <!-- Sorozatok táblázata -->
     <h2>Sorozatok</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Cím</th>
-            <th>Műfaj</th>
-            <th>Évadok</th>
-            <th>Részek Száma</th>
-            <th>Értékelés</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php while ($row = $result_sorozatok->fetch_assoc()): ?>
+    <table>
+        <thead>
             <tr>
-                <td><?= htmlspecialchars($row['cim']); ?></td>
-                <td><?= htmlspecialchars($row['mufaj']); ?></td>
-                <td><?= htmlspecialchars($row['evadok']); ?></td>
-                <td><?= htmlspecialchars($row['reszek']); ?></td>
-                <td><?= htmlspecialchars($row['sajat_ertekeles'] ?? 'Még nem értékelted'); ?></td>
+                <th>Cím</th>
+                <th>Műfaj</th>
+                <th>Évadok</th>
+                <th>Részek Száma</th>
+                <th>Színészek</th>
+                <th>Értékelés</th>
+                
             </tr>
-        <?php endwhile; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php while ($row = $result_sorozatok->fetch_assoc()): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['cim']); ?></td>
+                    <td><?= htmlspecialchars($row['mufaj']); ?></td>
+                    <td><?= htmlspecialchars($row['evadok']); ?></td>
+                    <td><?= htmlspecialchars($row['reszek']); ?></td>
+                    <td><?= htmlspecialchars($row['szinesz'] ?? 'N/A'); ?></td>
+                    <td>
+                        <?php if ($row['sajat_ertekeles'] === null): ?>
+                            Még nem értékelted
+                            <button onclick="window.location.href='rating.php?type=series&id=<?= $row['sorozat_id']; ?>'">Értékelés</button>
+                        <?php else: ?>
+                            <?= htmlspecialchars($row['sajat_ertekeles']); ?>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
     </div>
 </body>
 </html>

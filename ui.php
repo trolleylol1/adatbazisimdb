@@ -7,35 +7,31 @@ session_start();  // Session indítása
          <meta charset="UTF-8"> 
          <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
          <title>IMDB Applikáció</title>
-          <style> #register, #login { display: none; } </style>
           <link rel="stylesheet" href="styles.css">
-          
         </head>
+        
          <body> 
           <div id="ui">
             <header>
-                 <h1>Üdvözöllek az ✨<span id="verycool">IMDB</span>✨ adatbázisban!</h1>
-                 
-                 <?php if (isset($_SESSION['username'])): ?>
-    
-    <p id="greeting">Szia, <?php echo $_SESSION['username']; ?>!</p>
-    <button onclick="window.location.href='ui.php'">Főoldal</button>
-    <button onclick="document.getElementById('add').style.display='block';">Film/Sorozat felvétele</button>
-    <button onclick="window.location.href='list.php'">Filmek és Sorozatok Listája</button>
-    <button onclick="window.location.href='rating.php'">Értékelés</button>
-    <button onclick="window.location.href='logout.php'">Kijelentkezés</button>
-    
-    
-<?php else: ?>
-    
-    <button onclick="document.getElementById('register').style.display='block'; document.getElementById('login').style.display='none';">Regisztráció</button>
-    <button onclick="document.getElementById('login').style.display='block'; document.getElementById('register').style.display='none';">Bejelentkezés</button>
-<?php endif; ?>
-                </header>
-                 <main>
-                     <section id="register"> 
-                         <h2>Regisztráció</h2> 
-                         <form action="/adatbazisprojekt/register.php" method="POST">
+                <h1>Üdvözöllek az ✨<span id="verycool">IMDB</span>✨ adatbázisban!</h1>
+                <?php if (isset($_SESSION['username'])): ?>
+                    <p id="greeting">Szia, <?php echo $_SESSION['username']; ?>!</p>
+                    <button onclick="window.location.href='ui.php'">Főoldal</button>
+                    <button onclick="document.getElementById('add').style.display='block';">Film/Sorozat felvétele</button>
+                    <!-- <button onclick="window.location.href='list.php'">Filmek és Sorozatok Listája</button> -->
+                    <button onclick="window.location.href='list.php'">Filmek és Sorozatok Listája</button>
+                    <button onclick="window.location.href='actorslist.php'">Szorgalmas színészek</button>
+                    <button onclick="window.location.href='ratingavg.php'">Vicces tény</button>
+                    <button onclick="window.location.href='logout.php'">Kijelentkezés</button>
+                <?php else: ?>
+                    <button onclick="document.getElementById('register').style.display='block'; document.getElementById('login').style.display='none';">Regisztráció</button>
+                    <button onclick="document.getElementById('login').style.display='block'; document.getElementById('register').style.display='none';">Bejelentkezés</button>
+                <?php endif; ?>
+            </header>
+            <main>
+                <section id="register"> 
+                    <h2>Regisztráció</h2> 
+                        <form action="/adatbazisprojekt/register.php" method="POST">
                             <label for="nev">Név:</label>
                              <input type="text" id="nev" name="nev" required> 
                               <label for="felhasznalonev" id="loginsigninlabel">Felhasználónév:</label>
@@ -119,7 +115,9 @@ session_start();  // Session indítása
                  
             </main>
         </div>
-        <div><img src="protekcio.jpg" id="protekcio" alt="xd"></div>
+        <div>
+            <img src="protekcio.jpg" id="protekcio" alt="xd">
+        </div>
                          
         <footer>
               © 2024 use code kormosbiznisz in the itemshop

@@ -1,17 +1,16 @@
+<!--regisztracio gomb -->
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 $servername = "localhost";
-$username = "root"; // Az adatbázis-felhasználónév
-$password = "";     // Az adatbázis-jelszó
-$databasename = "projektmunka_imdb"; // Az adatbázis neve
+$username = "root"; 
+$password = "";     
+$databasename = "projektmunka_imdb"; 
 
-// Adatbázis kapcsolat
 $conn = new mysqli($servername, $username, $password, $databasename);
 
-// Kapcsolódási hiba ellenőrzése
 if ($conn->connect_error) {
     die("Kapcsolódási hiba: " . $conn->connect_error);
 }
@@ -19,14 +18,14 @@ if ($conn->connect_error) {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = $_POST['felhasznalonev'];
     $password = $_POST['jelszo'];
-    $name = $_POST['nev']; // Új mező a névhez
+    $name = $_POST['nev']; 
 
-    // Ellenőrzés: üres mezők
+    
     if (empty($username) || empty($password) || empty($name)) {
         die("Minden mezőt ki kell tölteni!");
     }
 
-    // Felhasználónév egyediségének ellenőrzése
+    // megnezi hogy letezik e mar ez a username
     $stmt = $conn->prepare("SELECT felhasznalo_id FROM felhasznalo WHERE felhasznalonev = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -37,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
     $stmt->close();
 
-    // Új felhasználó hozzáadása
+    
     $stmt = $conn->prepare("INSERT INTO felhasznalo (felhasznalonev, jelszo, nev) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $username, $password, $name);
 

@@ -1,18 +1,18 @@
+<!-- bejelentkezesgomb -->
 <?php
-// Hibák megjelenítése fejlesztéshez
+//
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Adatbázis kapcsolat
 $servername = "localhost";
-$username = "root";  // Adatbázis-felhasználónév
-$password = "";      // Adatbázis-jelszó
-$dbname = "projektmunka_imdb"; // Adatbázis neve
+$username = "root";  
+$password = "";      
+$dbname = "projektmunka_imdb"; 
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Kapcsolat ellenőrzése
+
 if ($conn->connect_error) {
     die("Kapcsolódási hiba: " . $conn->connect_error);
 }
@@ -20,35 +20,34 @@ if ($conn->connect_error) {
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Felhasználónév és jelszó bekérése
+    
     $username = $_POST['felhasznalonev'];
     $password = $_POST['jelszo'];
 
-    // Ellenőrizzük, hogy a mezők nem üresek-e
     if (empty($username) || empty($password)) {
         die("A felhasználónév és a jelszó megadása kötelező!");
     }
 
-    // Felhasználó lekérdezése az adatbázisból
+    // felhasnzalo ellenorzese
     $stmt = $conn->prepare("SELECT felhasznalo_id, jelszo, nev FROM felhasznalo WHERE felhasznalonev = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        // Ha van ilyen felhasználónév, lekérjük az adatokat
+        // ha egyezik a username akk jo
         $stmt->bind_result($id, $stored_password, $name);
         $stmt->fetch();
 
-        // Egyszerű jelszó ellenőrzés
+        
         if ($password === $stored_password) {
-            // Sikeres bejelentkezés
+            // hurra login
             $_SESSION['username'] = $username;
             $_SESSION['userid'] = $id;
             $_SESSION['name'] = $name;
 
             echo "Sikeres bejelentkezés! Üdvözöllek, " . htmlspecialchars($name) . "!";
-            header("Location: ui.php");  // Átirányítás az alkalmazás főoldalára
+            header("Location: ui.php"); 
             exit();
         } else {
             echo "Hibás jelszó!";

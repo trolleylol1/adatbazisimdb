@@ -1,9 +1,9 @@
+<!--kijelentkezes gomb  -->
 <?php
 session_start();
-session_unset();  // Törli a session változókat
-session_destroy();  // Megsemmisíti a session-t
+session_unset();  // session cuccait torli
+session_destroy();  
 
-// Átirányítás a főoldalra (vagy bármelyik másik oldalra)
 header("Location: ui.php");
 exit();
 ?>
